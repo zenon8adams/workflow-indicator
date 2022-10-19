@@ -1,3 +1,4 @@
+#!/usr/bin/env fish
 # name: Github workflow status indicator
 # author: Adesina Meekness
 
