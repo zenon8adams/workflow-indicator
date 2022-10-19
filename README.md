@@ -31,7 +31,7 @@ A collection of bash script for indicating workflow status
 ```
 
 ### Notes
- * Only Github workflow is currently supported.
+ * Only Github workflow is currently tested.
  * Only fish-shell is supported.
  * To show status of private repositories,
    your github token must be available at ~/.git-credentials
