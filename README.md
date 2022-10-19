@@ -27,6 +27,8 @@ A collection of bash script for indicating workflow status
 
 ### Installing
 ```sh
+  git clone https://github.com/zenon8adams/workflow-indicator
+  cd workflow-indicator
   make install
 ```
 
