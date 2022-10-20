@@ -29,7 +29,7 @@ A collection of bash script for indicating workflow status
 ```sh
   git clone https://github.com/zenon8adams/workflow-indicator
   cd workflow-indicator
-  make install
+  ./install.sh
 ```
 
 ### Notes
