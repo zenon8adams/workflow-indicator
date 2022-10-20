@@ -12,12 +12,12 @@ function fish_prompt --description 'Write out the prompt'
 
 # Color the prompt differently when we're root
     set -l color_cwd $fish_color_cwd
-    set -l suffix '>'
+    set -l suffix ' $'
     if functions -q fish_is_root_user; and fish_is_root_user
         if set -q fish_color_cwd_root
             set color_cwd $fish_color_cwd_root
         end
-        set suffix '#'
+        set suffix ' #'
     end
 
     if not set -q __fish_git_prompt_show_informative_status
@@ -68,7 +68,7 @@ function fish_prompt --description 'Write out the prompt'
 #		Check to know if there exists any commit in this branch
 		if test $status -eq 0
 			set head_sha (git rev-parse HEAD)
-			set track_file $PREFIX/tmp/$head_sha/.status
+			set track_file (echo $PREFIX)/tmp/$head_sha/.status
 			set diff 0
 		    if test -O $track_file
 		        set status_info (cat $track_file | head -1)
@@ -97,7 +97,7 @@ function fish_prompt --description 'Write out the prompt'
 				set conclusion (echo $response | grep -Eoh "\"conclusion\s*\":\s*\"([^\"]+)\"" \
 			                              	   |  sed -ne "s/^\s*.\+:\s*\"\(.\+\)\s*\"\$/\1/p")
 #           Write status and epoch back to tracker.
-				mkdir -p $PREFIX/tmp/$head_sha/
+				mkdir -p (echo $PREFIX)/tmp/$head_sha/
 		        echo "$status_info"  > $track_file
 				echo "$conclusion"  >> $track_file
 		        echo (date +%s) >> $track_file
