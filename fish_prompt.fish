@@ -68,7 +68,7 @@ function fish_prompt --description 'Write out the prompt'
 #		Check to know if there exists any commit in this branch
 		if test $status -eq 0
 			set head_sha (git rev-parse HEAD)
-			set track_file /tmp/$head_sha/.status
+			set track_file $PREFIX/tmp/$head_sha/.status
 			set diff 0
 		    if test -O $track_file
 		        set status_info (cat $track_file | head -1)
@@ -97,7 +97,7 @@ function fish_prompt --description 'Write out the prompt'
 				set conclusion (echo $response | grep -Eoh "\"conclusion\s*\":\s*\"([^\"]+)\"" \
 			                              	   |  sed -ne "s/^\s*.\+:\s*\"\(.\+\)\s*\"\$/\1/p")
 #           Write status and epoch back to tracker.
-				mkdir -p /tmp/$head_sha/
+				mkdir -p $PREFIX/tmp/$head_sha/
 		        echo "$status_info"  > $track_file
 				echo "$conclusion"  >> $track_file
 		        echo (date +%s) >> $track_file
