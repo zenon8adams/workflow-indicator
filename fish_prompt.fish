@@ -45,11 +45,11 @@ function fish_prompt --description 'Write out the prompt'
 		    if test -O $track_file
 		        set status_info (cat $track_file | head -1)
 		        set conclusion (cat $track_file | tail -n +2 | head -1)
-				set EPOCH (cat $track_file | tail -n +3 | head -1)
-		        if test -z "$EPOCH"
-		            set EPOCH 0
+				set epoch (cat $track_file | tail -n +3 | head -1)
+		        if test -z "$epoch"
+		            set epoch 0
 		        end
-		        test (math (date +%s) - $EPOCH) -gt 30 # Pool every 30 seconds for changes in status
+		        test (math (date +%s) - $epoch) -gt 30 # Pool every 30 seconds for changes in status
 		        set diff (echo $status)
 		    end
 #       	query workflow status information
