@@ -12,12 +12,12 @@ function fish_prompt --description 'Write out the prompt'
 
 # Color the prompt differently when we're root
     set -l color_cwd $fish_color_cwd
-    set -l suffix ' $'
+    set -l suffix '$'
     if functions -q fish_is_root_user; and fish_is_root_user
         if set -q fish_color_cwd_root
             set color_cwd $fish_color_cwd_root
         end
-        set suffix ' #'
+        set suffix '#'
     end
 
     if not set -q __fish_git_prompt_show_informative_status
@@ -103,18 +103,34 @@ function fish_prompt --description 'Write out the prompt'
 		        echo (date +%s) >> $track_file
 		    end
 
+#           JediTerm emulator does not have a good support for unicode.
+            echo $TERMINAL_EMULATOR | grep "JediTerm" > /dev/null
+            set is_jediterm (echo $status)
+                which luit > /dev/null          # Luit provides better support for non-unicode compliant terminals
+            set has_luit    (echo $status)
+            set in_progress_indicator "🟤"
+            set success_indicator     "🟢"
+            set failure_indicator     "🔴"
+            set unknown_indicator     "⚫"
+            if test $is_jediterm -eq 0
+                set in_progress_indicator  (set_color brown)"⏺`$normal"
+                set unknown_indicator      (set_color black)"⏺`$normal"
+                set success_indicator      (set_color green)"⏺`$normal"
+                set failure_indicator      (set_color   red)"⏺`$normal"
+            end
+
 #			Update vcs indicator
-		    if test "$status_info" = "in_progress"
-		        set vcs_prompt "$vcs_prompt🟤"
-		    else if test "$status_info" = "completed" && test "$conclusion" = "success"
-		        set vcs_prompt "$vcs_prompt🟢"
-		    else if test "$conclusion" = "failure" || test "$conclusion" = "cancelled"
-		        set vcs_prompt "$vcs_prompt🔴"
-		    else
-		        set vcs_prompt "$vcs_prompt⚫"
+            if test "$status_info" = "in_progress"
+                set vcs_prompt "$vcs_prompt"$in_progress_indicator
+            else if test "$status_info" = "completed" && test "$conclusion" = "success"
+                set vcs_prompt "$vcs_prompt"$success_indicator
+            else if test "$conclusion" = "failure" || test "$conclusion" = "cancelled"
+                set vcs_prompt "$vcs_prompt"$failure_indicator
+            else
+                set vcs_prompt "$vcs_prompt"$unknown_indicator
 		    end
 		end
     end
     echo -n -s (prompt_login)' ' (set_color $color_cwd) (prompt_pwd) \
-                $normal "$vcs_prompt" $normal " "$prompt_status $suffix " "
+                $normal $vcs_prompt $normal $prompt_status $suffix " "
 end
