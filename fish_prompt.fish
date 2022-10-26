@@ -106,8 +106,6 @@ function fish_prompt --description 'Write out the prompt'
 #           JediTerm emulator does not have a good support for unicode.
             echo $TERMINAL_EMULATOR | grep "JediTerm" > /dev/null
             set is_jediterm (echo $status)
-                which luit > /dev/null          # Luit provides better support for non-unicode compliant terminals
-            set has_luit    (echo $status)
             set in_progress_indicator "🟤"
             set success_indicator     "🟢"
             set failure_indicator     "🔴"
