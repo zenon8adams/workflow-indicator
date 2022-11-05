@@ -52,9 +52,11 @@ function fish_prompt --description 'Write out the prompt'
 #   If the status was carried over (if no command is issued or if `set` leaves the status untouched), don't bold it.
     set -l bold_flag --bold
     set -q __fish_prompt_status_generation; or set -g __fish_prompt_status_generation $status_generation
+
     if test $__fish_prompt_status_generation = $status_generation
         set bold_flag
     end
+    
     set __fish_prompt_status_generation $status_generation
     set -l status_color (set_color $fish_color_status)
     set -l statusb_color (set_color $bold_flag $fish_color_status)
@@ -63,6 +65,7 @@ function fish_prompt --description 'Write out the prompt'
 #   Detect if we are in a vcs environment
     set -l vcs_prompt (fish_vcs_prompt)
     set github (git config remote.origin.url | grep "github")
+
     if test -n $github && test -n "$vcs_prompt" # Tags are only supported for GitHub
 		git log > /dev/null 2>&1
 #		Check to know if there exists any commit in this branch
@@ -70,32 +73,44 @@ function fish_prompt --description 'Write out the prompt'
 			set head_sha (git rev-parse HEAD)
 			set track_file (echo $PREFIX)/tmp/$head_sha/.status
 			set diff 0
+
 		    if test -O $track_file
 		        set status_info (cat $track_file | head -1)
 		        set conclusion (cat $track_file | tail -n +2 | head -1)
 				set epoch (cat $track_file | tail -n +3 | head -1)
-		        if test -z "$epoch"
+		        
+                if test -z "$epoch"
 		            set epoch 0
-		        end
+                end
+
 		        test (math (date +%s) - $epoch) -gt 30 # Pool every 30 seconds for changes in status
 		        set diff (echo $status)
 		    end
+
 #       	query workflow status information
 		    test "$conclusion" = "success"
 		    set conclusion_is_success (echo $status)
 #      		check if last command executed is a git commmand that accesses the online provider
 		   echo $last_command | grep -E "git\s*(push|pull|ls-remote|fetch)" > /dev/null
 		   set last_command_queries_git (echo $status)
+
 		   if test $last_command_queries_git -eq 0 || test $conclusion_is_success -eq 1 && test $diff -eq 0
 		        set token (cat ~/.git-credentials 2>&1 | sed -n -e 's/^.\+:\(.\+\)@.\+$/\1/p')
+                set token_owner (cat ~/.git-credentials 2>&1 | sed -n -e 's/.\+\/\/\(.\+\):.\+/\1/p')
 		        set repo_link (git config remote.origin.url | sed -n -e 's/^.\+\/\(.\+\/.\+\)\.git$/\1/p')
-		        set response (curl -s -H "Accept: application/vnd.github+json" \
-		                              -H "Authorization: Bearer $token" \
-		                              https://api.github.com/repos/$repo_link/actions/runs\?head_sha=$head_sha 2>&1)
-				set status_info  (echo $response | grep -Eoh "\"status\s*\":\s*\"([^\"]+)\"" \
-		                               		| sed -ne "s/^\s*.\+:\s*\"\(.\+\)\s*\"\$/\1/p")
+                echo $repo_link | grep $token_owner >/dev/null
+                set status_query_builder curl -s -H "Accept: application/vnd.github+json"
+
+                if test $status -eq 0
+                    set status_query_builder $status_query_builder -H "Authorization: Bearer $token"
+                end
+                
+                set status_query_builder $status_query_builder 
+                set response ($status_query_builder https://api.github.com/repos/$repo_link/actions/runs\?head_sha=$head_sha 2>&1)\n
+				set status_info  (echo $response\n | grep -Eoh "\"status\s*\":\s*\"([^\"]+)\"" \
+		                               		       | sed -ne "1s/^\s*.\+:\s*\"\(.\+\)\s*\"\$/\1/p")
 				set conclusion (echo $response | grep -Eoh "\"conclusion\s*\":\s*\"([^\"]+)\"" \
-			                              	   |  sed -ne "s/^\s*.\+:\s*\"\(.\+\)\s*\"\$/\1/p")
+			                              	   |  sed -ne "1s/^\s*.\+:\s*\"\(.\+\)\s*\"\$/\1/p")
 #           Write status and epoch back to tracker.
 				mkdir -p (echo $PREFIX)/tmp/$head_sha/
 		        echo "$status_info"  > $track_file
@@ -110,6 +125,7 @@ function fish_prompt --description 'Write out the prompt'
             set success_indicator     "🟢"
             set failure_indicator     "🔴"
             set unknown_indicator     "⚫"
+
             if test $is_jediterm -eq 0
                 set in_progress_indicator  (set_color brown)"⏺`$normal"
                 set unknown_indicator      (set_color black)"⏺`$normal"
