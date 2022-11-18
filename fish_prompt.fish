@@ -97,7 +97,7 @@ function fish_prompt --description 'Write out the prompt'
 		   if test $last_command_queries_git -eq 0 || test $conclusion_is_success -eq 1 && test $diff -eq 0
 		        set token (cat ~/.git-credentials 2>&1 | sed -n -e 's/^.\+:\(.\+\)@.\+$/\1/p')
                 set token_owner (cat ~/.git-credentials 2>&1 | sed -n -e 's/.\+\/\/\(.\+\):.\+/\1/p')
-		        set repo_link (git config remote.origin.url | sed -n -e 's/^.\+\/\(.\+\/.\+\)\.git$/\1/p')
+		        set repo_link (git config remote.origin.url | sed -E 's|^.+/(.+/.+)(\.git)?$|\1|')
                 echo $repo_link | grep $token_owner >/dev/null
                 set status_query_builder curl -s -H "Accept: application/vnd.github+json"
 
